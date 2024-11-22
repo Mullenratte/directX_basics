@@ -1,8 +1,9 @@
+#include <string>
+#include <sstream>
 #include <Windows.h>
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    
     switch (msg)
     {
     // enables the application to quit properly when closing the window
@@ -22,15 +23,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             SetWindowText(hWnd, L"Key [F] released!");
         }
         break;
+    // reacts to keystrokes with corresponding text characters (e.g. does not get called if F1/F2/... is pressed)
+    // also distinguishes between capital and lower case letters
+    case WM_CHAR:
+        {
+            static std::string title;
+            title.push_back((char)wParam);
+            SetWindowTextA(hWnd, title.c_str());
+        }
+        break;
+    case WM_LBUTTONDOWN:
+        POINTS pt = MAKEPOINTS(lParam);
+        std::ostringstream oss;
+        oss << "(" << pt.x << ", " << pt.y << ")";
+        SetWindowTextA(hWnd, oss.str().c_str());
+
+        break;
     }
-    
+
     return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
 INT CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
     const auto pClassName = L"DirectX Game";
-    
+
     WNDCLASSEX wc = {};
     wc.cbSize = sizeof(wc);
     wc.style = CS_OWNDC;
@@ -45,7 +62,7 @@ INT CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     wc.lpszClassName = pClassName;
     wc.hIconSm = nullptr;
 
-    RegisterClassEx( &wc );
+    RegisterClassEx(&wc);
 
     HWND hWnd = CreateWindowEx(
         0,
@@ -65,20 +82,23 @@ INT CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     ShowWindow(hWnd, SW_SHOW);
 
     // message pump
-    
+
     // if wMsgFilterMin and -Max are both 0, GetMessage takes in ALL message numbers
     MSG msg;
     BOOL gResult;
-    while( (gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+    while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
     {
+        // generates WM_CHAR messages
         TranslateMessage(&msg);
+
         DispatchMessage(&msg);
     }
 
     if (gResult == -1)
     {
         return -1;
-    } else
+    }
+    else
     {
         return msg.wParam;
     }

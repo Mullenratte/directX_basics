@@ -1,7 +1,8 @@
 #include <Windows.h>
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    
     switch (msg)
     {
     // enables the application to quit properly when closing the window
@@ -9,8 +10,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_CLOSE:
         PostQuitMessage(10);
         break;
+    case WM_KEYDOWN:
+        if (wParam == 'F')
+        {
+            SetWindowText(hWnd, L"Key [F] pressed!");
+        }
+        break;
+    case WM_KEYUP:
+        if (wParam == 'F')
+        {
+            SetWindowText(hWnd, L"Key [F] released!");
+        }
+        break;
     }
-    return DefWindowProc(hwnd, msg, wParam, lParam);
+    
+    return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
 INT CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
